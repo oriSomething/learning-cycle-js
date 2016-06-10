@@ -1,0 +1,41 @@
+{
+  "name": "learning-cycle",
+  "version": "0.0.0",
+  "description": "Learning Cycle JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "NODE_ENV=development webpack-dev-server --port 4200 --inline --hot --content-base assets/"
+  },
+  "private": false,
+  "keywords": [],
+  "author": "ori livni",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@cycle/core": "^6.0.3",
+    "@cycle/dom": "^9.4.0",
+    "@cycle/isolate": "^1.3.2",
+    "bootstrap": "^4.0.0-alpha.2",
+    "lodash": "^4.13.1",
+    "rx": "^4.1.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^6.3.6",
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4",
+    "babel-plugin-transform-object-assign": "^6.8.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-preset-es2015": "^6.9.0",
+    "bootstrap": "^3.3.6",
+    "css-loader": "^0.23.1",
+    "cycle-restart": "0.0.14",
+    "eslint": "^2.11.1",
+    "html-webpack-plugin": "^2.20.0",
+    "lodash-webpack-plugin": "^0.9.1",
+    "postcss-cssnext": "^2.6.0",
+    "postcss-loader": "^0.9.1",
+    "style-loader": "^0.13.1",
+    "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1"
+  }
+}
