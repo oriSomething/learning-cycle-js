@@ -44,7 +44,12 @@
     }],
     "keyword-spacing": [2, {
       "before": true,
-      "after": true
+      "after": true,
+      "overrides": {
+        "catch": {
+          "after": false
+        }
+      }
     }],
     "max-statements-per-line": [2, {
       "max": 1
