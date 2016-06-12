@@ -17,8 +17,10 @@ function GithubSearch({ DOM }) {
     .flatMap(value => {
       if (value) {
         return Observable.just({
-          method: "get",
-          url: `https://api.github.com/search/repositories?q=${value}`,
+          url: `https://api.github.com/search/repositories`,
+          query: {
+            q: value,
+          },
           name: REQUEST_NAME,
         });
       } else {
