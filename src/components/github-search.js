@@ -1,10 +1,15 @@
 import { Observable } from "rx";
 import { div, input } from "@cycle/dom";
 import isolate from "@cycle/isolate";
+import _ from "lodash";
 
-const REQUEST_NAME = "github-search";
-
+/**
+ * @param {{ DOM: * }} sources
+ * @return {{ DOM: *, HTTP: *, requestName: string }}
+ */
 function GithubSearch({ DOM }) {
+  /** @type {String} */
+  const requestName = `github-search-${_.uniqueId()}`;
   /** @type {Observable} */
   const intent$ = DOM.select(".input")
     .events("input")
@@ -21,7 +26,7 @@ function GithubSearch({ DOM }) {
           query: {
             q: value,
           },
-          name: REQUEST_NAME,
+          name: requestName,
         });
       } else {
         return Observable.just({});
@@ -31,6 +36,7 @@ function GithubSearch({ DOM }) {
   const vtree$ = intent$.map((value) => {
     return div(".form-group", [
       input(".input.form-control", {
+        placeholder: "search for github project",
         type: "text",
         value,
       }),
@@ -40,11 +46,10 @@ function GithubSearch({ DOM }) {
   return {
     DOM: vtree$,
     HTTP: request$,
+    requestName,
   };
 }
 
 export default function GithubSearchFactory() {
   return isolate(GithubSearch)(...arguments);
 }
-
-GithubSearchFactory.REQUEST_NAME = REQUEST_NAME;

@@ -9,15 +9,12 @@ import GithubProjectList from "./github-project-list";
  */
 export default function App({ DOM, HTTP }) {
   /** @type {Observable} */
-  const request$ = HTTP.filter(res$ => res$.request.name === GithubSearch.REQUEST_NAME)
-    .mergeAll()
-    .map(res => JSON.parse(res.text))
-    .startWith({})
-    .map(({ items = [] }) => items);
+  const githubSearch$ = GithubSearch({ DOM });
   /** @type {Observable} */
-  const githubProjectList$ = GithubProjectList({ items$: request$ });
-  /** @type {Observable} */
-  const githubSearch$ = GithubSearch({ DOM, HTTP });
+  const githubProjectList$ = GithubProjectList({
+    HTTP,
+    requestName: githubSearch$.requestName,
+  });
   /** @type {Observable} */
   const vtree$ = Observable.combineLatest(githubSearch$.DOM, githubProjectList$.DOM)
     .map(([githubSearchVTree, githubProjectList]) => {
