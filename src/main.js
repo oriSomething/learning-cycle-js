@@ -1,10 +1,12 @@
 import { run } from "@cycle/core";
 import { makeDOMDriver } from "@cycle/dom";
+import { makeHTTPDriver } from "@cycle/http";
 import isolate from "@cycle/isolate";
 import { rerunner, restartable } from "cycle-restart";
 import App from "./components/app";
 
 const domDriver = makeDOMDriver("#main");
+const httpDriver = makeHTTPDriver();
 
 /** hot reloading magic */
 if (typeof module !== "undefined" && module.hot) {
@@ -13,6 +15,7 @@ if (typeof module !== "undefined" && module.hot) {
     DOM: restartable(domDriver, {
       pauseSinksWhileReplaying: false,
     }),
+    HTTP: httpDriver,
   };
 
   const rerun = rerunner(run, isolate);
@@ -26,6 +29,7 @@ if (typeof module !== "undefined" && module.hot) {
   /** Without hot reloading */
   const drivers = {
     DOM: domDriver,
+    HTTP: httpDriver,
   };
 
   run(App, drivers);

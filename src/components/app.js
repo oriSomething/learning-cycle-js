@@ -1,24 +1,33 @@
 import { Observable } from "rx";
-import { div, h1 } from "@cycle/dom";
-import Input from "./input";
+import { div } from "@cycle/dom";
+import GithubSearch from "./github-search";
+import GithubProjectList from "./github-project-list";
 
 /**
- * @param {{ DOM: * }} sources
- * @return {{ DOM: * }} sinks
+ * @param {{ DOM: *, HTTP: * }} sources
+ * @return {{ DOM: *, HTTP: * }} sinks
  */
-export default function App({ DOM }) {
+export default function App({ DOM, HTTP }) {
   /** @type {Observable} */
-  const inputA$ = Input({ DOM });
+  const request$ = HTTP.filter(res$ => res$.request.name === GithubSearch.REQUEST_NAME)
+    .mergeAll()
+    .map(res => JSON.parse(res.text))
+    .startWith({})
+    .map(({ items = [] }) => items);
   /** @type {Observable} */
-  const vtree$ = Observable.combineLatest(inputA$.DOM, inputA$.value$)
-    .map(([inputAVTree, value]) => {
+  const githubProjectList$ = GithubProjectList({ items$: request$ });
+  /** @type {Observable} */
+  const githubSearch$ = GithubSearch({ DOM, HTTP });
+  /** @type {Observable} */
+  const vtree$ = Observable.combineLatest(githubSearch$.DOM, githubProjectList$.DOM)
+    .map(([githubSearchVTree, githubProjectList]) => {
       return (
         div(".container", [
           div(".row", [
             div(".col-xs", [
-              inputAVTree,
-              h1("", String(value)),
+              githubSearchVTree,
             ]),
+            githubProjectList,
           ]),
         ])
       );
@@ -26,5 +35,6 @@ export default function App({ DOM }) {
 
   return {
     DOM: vtree$,
+    HTTP: githubSearch$.HTTP,
   };
 }
