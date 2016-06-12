@@ -1,36 +1,11 @@
 import { run } from "@cycle/core";
 import { makeDOMDriver } from "@cycle/dom";
 import { makeHTTPDriver } from "@cycle/http";
-import isolate from "@cycle/isolate";
-import { rerunner, restartable } from "cycle-restart";
 import App from "./components/app";
 
-const domDriver = makeDOMDriver("#main");
-const httpDriver = makeHTTPDriver();
+const drivers = {
+  DOM: makeDOMDriver("#main"),
+  HTTP: makeHTTPDriver(),
+};
 
-/** hot reloading magic */
-if (typeof module !== "undefined" && module.hot) {
-  const drivers = {
-    /** @type {*} For hot reload */
-    DOM: restartable(domDriver, {
-      pauseSinksWhileReplaying: false,
-    }),
-    HTTP: httpDriver,
-  };
-
-  const rerun = rerunner(run, isolate);
-  rerun(App, drivers);
-
-  module.hot.accept("./components/app", () => {
-    const App = require("./components/app")["default"];
-    rerun(App, drivers);
-  });
-} else {
-  /** Without hot reloading */
-  const drivers = {
-    DOM: domDriver,
-    HTTP: httpDriver,
-  };
-
-  run(App, drivers);
-}
+run(App, drivers);
