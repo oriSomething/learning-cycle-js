@@ -21,7 +21,7 @@ function GithubSearch({ DOM }) {
     .debounce(250)
     .flatMap(value => {
       if (value) {
-        return Observable.just({
+        return Observable.of({
           url: `https://api.github.com/search/repositories`,
           query: {
             q: value,
@@ -29,7 +29,7 @@ function GithubSearch({ DOM }) {
           name: requestName,
         });
       } else {
-        return Observable.just({});
+        return Observable.of({});
       }
     });
   /** @type {Observable} */

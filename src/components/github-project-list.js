@@ -15,7 +15,7 @@ function model(intent$, limit) {
     .flatMapLatest(items => {
       const sorted = items.sort((x, y) => x.stargazers_count > y.stargazers_count);
       const sliced = sorted.slice(0, limit);
-      return Observable.just(sliced);
+      return Observable.of(sliced);
     });
 }
 
