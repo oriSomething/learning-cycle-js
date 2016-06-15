@@ -8,14 +8,13 @@ import GithubProjectList from "./github-project-list";
  * @return {{ DOM: *, HTTP: * }} sinks
  */
 export default function App({ DOM, HTTP }) {
-  /** @type {Observable} */
-  const githubSearch$ = GithubSearch({ DOM });
-  /** @type {Observable} */
+  const githubSearch$ = GithubSearch({ DOM, HTTP });
+
   const githubProjectList$ = GithubProjectList({
     HTTP,
-    requestName: githubSearch$.requestName,
+    items$: githubSearch$.items$,
   });
-  /** @type {Observable} */
+
   const vtree$ = Observable.combineLatest(githubSearch$.DOM, githubProjectList$.DOM)
     .map(([githubSearchVTree, githubProjectList]) => {
       return (

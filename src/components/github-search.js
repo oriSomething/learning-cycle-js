@@ -4,49 +4,69 @@ import isolate from "@cycle/isolate";
 import _ from "lodash";
 
 /**
- * @param {{ DOM: * }} sources
- * @return {{ DOM: *, HTTP: *, requestName: string }}
+ * @param {{ DOM: *, HTTP: * }} sources
+ * @return {{ DOM: *, HTTP: *, items$: Observable.<*[]> }}
  */
-function GithubSearch({ DOM }) {
-  /** @type {String} */
-  const requestName = `github-search-${_.uniqueId()}`;
-  /** @type {Observable} */
-  const intent$ = DOM.select(".input")
+function GithubSearch({ DOM, HTTP }) {
+  const inputOnInput$ = DOM.select(".input")
     .events("input")
     .map(e => e.target.value)
-    .map(value => value || "")
-    .startWith("");
-  /** @type {Observable} */
-  const request$ = intent$
-    .debounce(250)
-    .flatMap(value => {
-      if (value) {
-        return Observable.of({
-          url: `https://api.github.com/search/repositories`,
-          query: {
-            q: value,
-          },
-          name: requestName,
-        });
-      } else {
-        return Observable.of({});
-      }
-    });
-  /** @type {Observable} */
-  const vtree$ = intent$.map((value) => {
+    .startWith(null);
+
+  const inputOnInputDebounced$ = inputOnInput$.debounce(250);
+
+  const requestName$ = inputOnInputDebounced$
+    .map(__ => `github-search-${_.uniqueId()}`)
+    .shareReplay(1);
+
+  const intentHTTP$ = requestName$
+    .flatMap(requestName => HTTP.filter(response => response.request.name === requestName))
+    .mergeAll()
+    .startWith(null)
+    .shareReplay(1);
+
+  const vtree$ = Observable.combineLatest(inputOnInput$, requestName$, intentHTTP$, (value, requestName, response) => {
+    const isFirst = (!value) && response == null;
+    const isLoading = !isFirst && (response == null || (response.request.name !== requestName));
+
+    let items = [];
+    if (!(isFirst || isLoading)) {
+      items = JSON.parse(response.text).items;
+    }
+
     return div(".form-group", [
       input(".input.form-control", {
         placeholder: "search for github project",
         type: "text",
         value,
       }),
+      (isLoading || isFirst ?
+          div([isFirst ? "" : "loading…"]) :
+          div([`${items.length} items`])
+      ),
     ]);
   });
 
+  const requestHTTP$ = Observable.combineLatest(inputOnInputDebounced$, requestName$)
+    .filter(([value]) => Boolean(value))
+    .map(([value, requestName]) => Observable.of({
+      url: "https://api.github.com/search/repositories",
+      query: {
+        q: value,
+      },
+      name: requestName,
+    }))
+    .flatMap(_.identity);
+
+  const items$ = intentHTTP$
+    .filter(_.isObject)
+    .map(response => JSON.parse(response.text).items)
+    .startWith([]);
+
   return {
     DOM: vtree$,
-    HTTP: request$,
-    requestName,
+    HTTP: requestHTTP$,
+    items$,
   };
 }
 
